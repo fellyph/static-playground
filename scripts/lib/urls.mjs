@@ -23,5 +23,6 @@ export function assetFile(url) {
   return clean.slice(0, clean.length - ext.length) + '.' + sha256(query.toString()).slice(0, 12) + ext;
 }
 export function temporaryUrl(text) {
-  return /(?:https?:)?(?:\/\/|\\\/\\\/)(?:localhost|127\.0\.0\.1|\[::1\]|playground\.wordpress\.net)(?=[:/\\"\s]|$)|\/scope:[a-zA-Z0-9_-]+\//i.test(text);
+  const plain = text.replaceAll('\\/', '/');
+  return /(?:https?:)?\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?=[:/"\s]|$)|playground\.wordpress\.net\/(?:scope:|wp-content\/|wp-includes\/|wp-admin\/|wp-json\/)|\/scope:[a-zA-Z0-9_-]+\//i.test(plain);
 }

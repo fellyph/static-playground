@@ -18,6 +18,7 @@ test('output paths exclude source backups, traversal and runtime services', () =
   assert.equal(assetFile(new URL('https://site.test/style.css?ver=1')), 'style.css');
   assert.notEqual(assetFile(new URL('https://site.test/style.css?size=1')), assetFile(new URL('https://site.test/style.css?size=2')));
   assert.ok(temporaryUrl('https://playground.wordpress.net/scope:abc/a'));
+  assert.equal(temporaryUrl('https://playground.wordpress.net/'), false, 'Keep intentional links to Playground itself.');
   assert.ok(temporaryUrl('http:\\/\\/127.0.0.1:1234\\/a'));
 });
 
