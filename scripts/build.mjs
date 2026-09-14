@@ -19,7 +19,10 @@ export async function build(c, { snapshots = snapshotDir, output = outputDir, re
   let result;
   try {
     console.log('Checking database and discovering public routes...');
-    await metadata(runtime);
+    const restored = await metadata(runtime);
+    if (restored.wordpressVersion !== checkpoint.wordpressVersion || restored.phpVersion !== checkpoint.phpVersion) {
+      throw new Error('Restored runtime does not match checkpoint versions.');
+    }
     if (!await runtime.playground.isDir('/wordpress/wp-content/mu-plugins')) await runtime.playground.mkdir('/wordpress/wp-content/mu-plugins');
     await runtime.playground.writeFile('/wordpress/wp-content/mu-plugins/static-publishing.php', new Uint8Array(await readFile(resolve(root, 'scripts/wordpress/prepare.php'))));
     const response = await runtime.playground.run({ code: await readFile(resolve(root, 'scripts/wordpress/inventory.php'), 'utf8') });

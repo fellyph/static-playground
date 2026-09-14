@@ -52,10 +52,11 @@ export function html(text, rewrite, rewriteText = x => x) {
         if (['og:url', 'twitter:url'].includes(property)) attr.value = rewrite(attr.value, 'canonical');
         else if (/^(og|twitter):(image|video|audio)(:url|:secure_url)?$/.test(property)) attr.value = rewrite(attr.value, 'social-asset');
       }
-      attr.value = rewriteText(attr.value);
+      if (attr.value !== null) attr.value = rewriteText(attr.value);
     }
+    if (node.attrs) node.attrs = attrs.filter(attr => attr.value !== null);
     if (node.tagName === 'style') {
-      for (const child of node.childNodes || []) if (child.nodeName === '#text') child.value = css(child.value, rewrite);
+      for (const child of node.childNodes || []) if (child.nodeName === '#text') child.value = rewriteText(css(child.value, rewrite));
     }
     if (node.tagName === 'script') {
       for (const child of node.childNodes || []) if (child.nodeName === '#text') {

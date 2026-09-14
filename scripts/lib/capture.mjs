@@ -23,7 +23,7 @@ export async function download(url, file, allow404 = false) {
 
 export async function capture({ origin, oldOrigin, productionUrl, routes, output }) {
   await init;
-  const queue = new Map(); const files = new Map(); const external = new Set(); const references = [];
+  const queue = new Map(); const files = new Map(); const external = new Set(); const references = []; const omittedLinks = [];
   const origins = [origin, oldOrigin].filter(Boolean).map(s => s.replace(/\/$/, '')).sort((a, b) => b.length - a.length);
   function local(raw, base) {
     let value = raw;
@@ -45,6 +45,10 @@ export async function capture({ origin, oldOrigin, productionUrl, routes, output
       if (!raw || /^(#|data:|mailto:|tel:|javascript:|blob:)/i.test(raw)) return raw;
       const { url, internal } = local(raw, base);
       if (!internal) { if (kind.includes('asset')) external.add(url.href); return raw; }
+      if (kind === 'link' && /^\/(wp-admin(?:\/|$)|wp-login\.php(?:$|\/))/.test(url.pathname)) {
+        omittedLinks.push({ from: new URL(base).pathname, target: url.pathname, reason: 'WordPress administration is unavailable on the static host.' });
+        return null;
+      }
       safePath(url.pathname);
       let target;
       if (kind.includes('asset') || kind === 'link' && /\.(png|jpe?g|gif|webp|avif|svg|pdf|mp[34]|webm|ogg|wav|woff2?|ttf|css|m?js)$/i.test(url.pathname)) target = enqueue(url);
@@ -81,7 +85,7 @@ export async function capture({ origin, oldOrigin, productionUrl, routes, output
     const target = resolve(output, file);
     const response = await download(url, target);
     if (response.type.includes('text/html')) throw new Error(`Asset returned HTML: ${url}`);
-    if (/\.css$/i.test(file)) await writeFile(target, css(await readFile(target, 'utf8'), rewriter(url)));
+    if (/\.css$/i.test(file)) await writeFile(target, rewriteText(css(await readFile(target, 'utf8'), rewriter(url))));
     else if (/\.m?js$/i.test(file)) {
       let text = await readFile(target, 'utf8');
       const [imports] = parseModules(text);
@@ -96,5 +100,5 @@ export async function capture({ origin, oldOrigin, productionUrl, routes, output
   const escape = value => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('"', '&quot;');
   await writeFile(resolve(output, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + routes.map(route => `<url><loc>${escape(productionUrl + route)}</loc></url>`).join('') + '</urlset>');
   await writeFile(resolve(output, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${productionUrl}/sitemap.xml\n`);
-  return { routes, references, externalAssets: [...external].sort(), assetCount: queue.size };
+  return { routes, references, omittedLinks, externalAssets: [...external].sort(), assetCount: queue.size };
 }

@@ -34,7 +34,7 @@ Set the production HTTPS origin and Spacefast Space ID in `site.config.json`. Se
 4. Commit `snapshots/site.zip` and `snapshots/site.json` together and push to `main`. Git LFS stores the archive; Git records each checkpoint's checksum and metadata.
 5. GitHub Actions rebuilds and validates the checkpoint, then publishes only `dist` to Spacefast.
 
-The importer validates ZIP paths, CRCs, database header, export manifest, and archive size, then restores the site and checks SQLite integrity before replacing the checkpoint. Interrupted imports are caught by the archive/metadata checksum check on build. V1 accepts current root-level Playground ZIP exports up to 250 MiB compressed / 1 GiB expanded.
+The importer validates ZIP paths, CRCs, database header, export manifest, and archive size, then restores the site and checks SQLite integrity before replacing the checkpoint. WordPress downloads use an exact official release URL because the CLI's numeric version resolver can select a newer release candidate. Import and build both verify the running WordPress and PHP versions against the requested checkpoint. Interrupted imports are caught by the archive/metadata checksum check on build. V1 accepts current root-level Playground ZIP exports up to 250 MiB compressed / 1 GiB expanded.
 
 Blueprint steps run against an isolated, temporary WordPress runtime. The original archive is never mounted writable or modified. Treat snapshots as trusted executable site source: installed plugins and themes run during restoration. Only use checkpoints from trusted editors.
 
@@ -51,7 +51,9 @@ Configure repository secret `SPACEFAST_TOKEN` with a Spacefast `ci_deploy` token
 
 The workflow runs unit tests and a generated-fixture browser test, builds the committed checkpoint, and uploads static output and reports. Pull requests never receive the publishing secret. The separate deployment job publishes on `main`, serializes releases, and skips commits superseded by the current branch head. Failed builds do not deploy; deployment errors fail the job. The deployment artifact records commit, checkpoint checksum, version, and live URL.
 
-Before destination variables are configured, CI validates using `https://fixture.example` and explicitly skips deployment. After both variables are set, a missing/invalid token fails deployment. The initial committed checkpoint is the acceptance fixture; replace it with your own Playground export before publishing your site.
+Before destination variables are configured, CI validates using `https://fixture.example` and explicitly skips deployment. After both variables are set, a missing/invalid token fails deployment.
+
+The committed checkpoint is **Southbound Surf Crew**, exported from the saved Playground site `confident-classic-lake` on September 14, 2026. It restores WordPress 7.1 / PHP 8.3, the `southbound` block theme, and homepage ID 6. It includes the original starter pages and post; the draft privacy page stays unpublished. Unsplash images and Google Fonts remain external dependencies. The ZIP contains the actual saved site's complete `wp-content`, SQLite database, `wp-config.php`, and format-2 export manifest. Its checksum is recorded in `snapshots/site.json`. The generated acceptance fixture remains separate under `.cache/fixture`.
 
 For local deployment, set `SPACEFAST_TOKEN` in your environment and run `npm run publish`. The command revalidates the static output and requires its production URL to match the destination configuration.
 

@@ -8,7 +8,12 @@ export async function importSnapshot(file, c, destination = snapshotDir) {
   const inspected = await inspectArchive(file);
   const runtime = await startRuntime(c, file);
   let meta;
-  try { meta = await metadata(runtime); } finally { await runtime[Symbol.asyncDispose](); }
+  try {
+    meta = await metadata(runtime);
+    if (meta.wordpressVersion !== c.wordpressVersion || meta.phpVersion !== c.phpVersion) {
+      throw new Error(`Restored runtime does not match requested WordPress ${c.wordpressVersion} / PHP ${c.phpVersion}.`);
+    }
+  } finally { await runtime[Symbol.asyncDispose](); }
   await mkdir(destination, { recursive: true });
   const temporary = resolve(destination, 'site.zip.tmp');
   await copyFile(file, temporary);

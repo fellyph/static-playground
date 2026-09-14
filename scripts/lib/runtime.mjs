@@ -6,7 +6,9 @@ import { inspectArchive } from './archive.mjs';
 export async function startRuntime(c, archive) {
   const steps = archive ? [{ step: 'importWordPressFiles', wordPressFilesZip: { resource: 'literal', name: 'site.zip', contents: new Uint8Array(await readFile(archive)) } }] : [];
   const runtime = await runCLI({
-    command: 'server', port: 0, wp: c.wordpressVersion, php: c.phpVersion,
+    // The CLI's version resolver prefix-matches beta offers (7.1 can select
+    // 7.1.1-RC1). An official release URL preserves the requested checkpoint.
+    command: 'server', port: 0, wp: `https://wordpress.org/wordpress-${c.wordpressVersion}.zip`, php: c.phpVersion,
     ...(!archive && c.fixtureSourceUrl ? { 'site-url': c.fixtureSourceUrl } : {}),
     // Archive steps use /tmp across multiple calls; keep them on one worker.
     login: false, internalCookieStore: false, verbosity: process.env.PLAYGROUND_VERBOSE ? 'normal' : 'quiet', workers: 1,

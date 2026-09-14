@@ -8,9 +8,27 @@ import { safePath, assetFile, routeFile, temporaryUrl } from '../scripts/lib/url
 import { html, css } from '../scripts/lib/transform.mjs';
 import { inspectArchive } from '../scripts/lib/archive.mjs';
 import { validate } from '../scripts/validate.mjs';
-import { download } from '../scripts/lib/capture.mjs';
+import { download, capture } from '../scripts/lib/capture.mjs';
 import { saveJson } from '../scripts/lib/config.mjs';
 import { runPublish } from '../scripts/publish.mjs';
+
+test('static capture preserves admin link text without exporting administrative endpoints', async () => {
+  const dir = await mkdtemp(resolve(tmpdir(), 'static-admin-links-'));
+  const server = http.createServer((req, res) => {
+    res.writeHead(req.url === '/' ? 200 : 404, { 'Content-Type': 'text/html' });
+    res.end(`<style>p{color:red}/*# sourceURL=http://127.0.0.1:${server.address().port}/wp-includes/style.css */</style><p>Visit your <a href="/wp-admin/">dashboard</a>.</p>`);
+  });
+  await new Promise(done => server.listen(0, '127.0.0.1', done));
+  try {
+    const origin = `http://127.0.0.1:${server.address().port}`;
+    const result = await capture({ origin, productionUrl: 'https://site.test', routes: ['/'], output: dir });
+    assert.match(await readFile(resolve(dir, 'index.html'), 'utf8'), /<a>dashboard<\/a>/);
+    assert.equal(temporaryUrl(await readFile(resolve(dir, 'index.html'), 'utf8')), false);
+    assert.equal(result.omittedLinks[0].target, '/wp-admin/');
+    assert.equal(result.assetCount, 0);
+    assert.equal(result.references.length, 0);
+  } finally { await new Promise(done => server.close(done)); await rm(dir, { recursive: true, force: true }); }
+});
 
 test('output paths exclude source backups, traversal and runtime services', () => {
   for (const path of ['/wp-content/database/.ht.sqlite', '/wp-admin/', '/wp-json/wp/v2/posts', '/archive.zip', '/a.php', '/%2e%2e/secret', '/.env', '/a%5cb']) assert.throws(() => safePath(path));
