@@ -21,7 +21,7 @@ export async function build(c, { snapshots = snapshotDir, output = outputDir, re
     console.log('Checking database and discovering public routes...');
     await metadata(runtime);
     if (!await runtime.playground.isDir('/wordpress/wp-content/mu-plugins')) await runtime.playground.mkdir('/wordpress/wp-content/mu-plugins');
-    await runtime.playground.writeFile('/wordpress/wp-content/mu-plugins/static-publishing.php', await readFile(resolve(root, 'scripts/wordpress/prepare.php')));
+    await runtime.playground.writeFile('/wordpress/wp-content/mu-plugins/static-publishing.php', new Uint8Array(await readFile(resolve(root, 'scripts/wordpress/prepare.php'))));
     const response = await runtime.playground.run({ code: await readFile(resolve(root, 'scripts/wordpress/inventory.php'), 'utf8') });
     if (response.exitCode !== 0) throw new Error(response.errors || response.text);
     const routes = [...new Set([...JSON.parse(response.text), ...c.additionalRoutes])].sort();

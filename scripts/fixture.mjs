@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { zipWpContent } from '@wp-playground/blueprints';
 import { PNG } from 'pngjs';
+import assert from 'node:assert/strict';
 import { startRuntime, php } from './lib/runtime.mjs';
 import { root, saveJson } from './lib/config.mjs';
 import { importSnapshot } from './snapshot-import.mjs';
@@ -17,7 +18,9 @@ export async function fixture(destination = resolve(root, '.cache/fixture')) {
       const i = (y * pic.width + x) * 4;
       pic.data[i] = 25 + Math.floor(x / 12); pic.data[i + 1] = 100 + Math.floor(y / 6); pic.data[i + 2] = 130; pic.data[i + 3] = 255;
     }
-    await r.playground.writeFile('/tmp/fixture.png', PNG.sync.write(pic));
+    const imageBytes = new Uint8Array(PNG.sync.write(pic));
+    await r.playground.writeFile('/tmp/fixture.png', imageBytes);
+    assert.deepEqual(new Uint8Array(await r.playground.readFileAsBuffer('/tmp/fixture.png')), imageBytes, 'Fixture image must cross the worker boundary intact.');
     const result = await r.playground.run({ code: await readFile(resolve(root, 'test/fixture.php'), 'utf8') });
     if (result.exitCode) throw new Error(result.errors || result.text);
     await writeFile(archive, await zipWpContent(r.playground));
