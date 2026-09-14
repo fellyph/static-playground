@@ -11,7 +11,7 @@ update_option('blogdescription', 'Edited in WordPress. Published as static files
 update_option('permalink_structure', '/%postname%/');
 update_option('posts_per_page', 2);
 $image = media_handle_sideload(array('name' => 'field-notes.png', 'tmp_name' => '/tmp/fixture.png'), 0);
-if (is_wp_error($image)) throw new Exception($image->get_error_message());
+if (is_wp_error($image)) throw new Exception($image->get_error_message() . ' Fixture diagnostics: ' . wp_json_encode(array('mime' => wp_get_image_mime('/tmp/fixture.png'), 'check' => wp_check_filetype_and_ext('/tmp/fixture.png', 'field-notes.png'), 'size' => filesize('/tmp/fixture.png'), 'header' => bin2hex(file_get_contents('/tmp/fixture.png', false, null, 0, 8)), 'pngAllowed' => get_allowed_mime_types()['png'] ?? null)));
 $picture = '<!-- wp:image {"id":' . $image . ',"sizeSlug":"large"} --><figure class="wp-block-image size-large">' . wp_get_attachment_image($image, 'large') . '</figure><!-- /wp:image -->';
 $home = wp_insert_post(array('post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Home', 'post_content' => '<!-- wp:heading {"level":1} --><h1 class="wp-block-heading">A local place to create.</h1><!-- /wp:heading --><!-- wp:paragraph --><p>This design and its content travel together in a Playground checkpoint.</p><!-- /wp:paragraph -->' . $picture));
 $about = wp_insert_post(array('post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'About', 'post_content' => '<!-- wp:paragraph --><p>A small publishing experiment built with WordPress Playground.</p><!-- /wp:paragraph -->'));
