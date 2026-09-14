@@ -1,0 +1,100 @@
+name: Static site
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PRODUCTION_URL: ${{ vars.PRODUCTION_URL || 'https://fixture.example' }}
+      SPACEFAST_SPACE: ${{ vars.SPACEFAST_SPACE }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: sudo apt-get update && sudo apt-get install -y wget
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: npm run build
+      - run: npm run validate
+      - name: Publishing setup status
+        if: vars.PRODUCTION_URL == '' || vars.SPACEFAST_SPACE == ''
+        run: echo 'Build validated. Configure PRODUCTION_URL, SPACEFAST_SPACE and SPACEFAST_TOKEN to enable publishing.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation-${{ github.sha }}
+          path: |
+            reports/
+            .cache/fixture/reports/
+          include-hidden-files: true
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: static-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.PRODUCTION_URL != '' && vars.SPACEFAST_SPACE != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: spacefast-production
+      cancel-in-progress: false
+    environment: production
+    env:
+      PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+      SPACEFAST_SPACE: ${{ vars.SPACEFAST_SPACE }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --omit=dev
+      - uses: actions/download-artifact@v4
+        with:
+          name: static-${{ github.sha }}
+          path: dist
+      - uses: actions/download-artifact@v4
+        with:
+          name: validation-${{ github.sha }}
+          path: downloaded-reports
+      - run: mkdir -p reports && cp downloaded-reports/reports/build.json reports/build.json
+      - name: Skip superseded commits
+        id: current
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          head=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
+          if [ "$head" = "$GITHUB_SHA" ]; then echo 'publish=true' >> "$GITHUB_OUTPUT"; fi
+      - name: Publish validated output
+        if: steps.current.outputs.publish == 'true'
+        env:
+          SPACEFAST_TOKEN: ${{ secrets.SPACEFAST_TOKEN }}
+        run: npm run publish
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deployment-${{ github.sha }}
+          path: reports/deployment.json
+          if-no-files-found: ignore

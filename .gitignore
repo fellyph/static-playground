@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.cache/
+reports/
+.DS_Store
+.env*
+.spacefast/state.json
+site.config.json

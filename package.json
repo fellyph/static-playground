@@ -1,0 +1,41 @@
+{
+  "name": "static-playground",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "scripts": {
+    "postinstall": "node scripts/patch-playground.mjs",
+    "snapshot:import": "node scripts/snapshot-import.mjs",
+    "fixture": "node scripts/fixture.mjs",
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate.mjs",
+    "publish": "node scripts/publish.mjs",
+    "test": "node --test test/*.test.mjs",
+    "test:e2e": "node scripts/e2e.mjs"
+  },
+  "dependencies": {
+    "@wp-playground/blueprints": "3.1.53",
+    "@wp-playground/cli": "3.1.53",
+    "crc-32": "1.2.2",
+    "es-module-lexer": "3.0.2",
+    "parse-srcset": "1.0.2",
+    "parse5": "8.0.1",
+    "postcss": "8.5.28",
+    "postcss-value-parser": "4.2.0",
+    "spacefast": "0.4.1",
+    "yauzl": "3.4.0"
+  },
+  "overrides": {
+    "qs": "6.16.0",
+    "js-yaml": "4.3.2",
+    "esbuild": "0.28.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "pixelmatch": "7.2.0",
+    "pngjs": "7.0.0"
+  }
+}

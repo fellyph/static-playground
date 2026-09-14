@@ -1,0 +1,24 @@
+{
+  "sha256": "f3e4d57dc5539e870d877c6c6747b125bdbfcc3c0b139cdbe5efda71f3bbd301",
+  "bytes": 13342002,
+  "entries": 442,
+  "manifest": {
+    "formatVersion": 2,
+    "siteUrl": "https://playground.wordpress.net/scope:fixture"
+  },
+  "wordpressVersion": "6.8.3",
+  "phpVersion": "8.3",
+  "themes": {
+    "twentytwentyfive": "1.3",
+    "twentytwentyfour": "1.3",
+    "twentytwentythree": "1.6"
+  },
+  "plugins": {
+    "akismet/akismet.php": "5.5",
+    "hello.php": "1.7.2"
+  },
+  "activeTheme": "twentytwentyfive",
+  "databaseIntegrity": "ok",
+  "importedAt": "2026-09-14T11:29:36.170Z",
+  "runtimeVersionSource": "Explicit import configuration; browser exports do not record runtime versions."
+}

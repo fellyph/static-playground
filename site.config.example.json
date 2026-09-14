@@ -1,0 +1,7 @@
+{
+  "productionUrl": "https://YOUR-SITE.example",
+  "spacefastSpace": "YOUR-SPACE-ID",
+  "additionalRoutes": [],
+  "phpVersion": "8.3",
+  "wordpressVersion": "6.8.3"
+}
