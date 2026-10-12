@@ -3,16 +3,23 @@ import { resolve } from 'node:path';
 import { config, json, saveJson, root, outputDir, reportDir } from './lib/config.mjs';
 import { validate } from './validate.mjs';
 
+function redact(text, token) {
+  let safe = text || '';
+  if (token) safe = safe.replaceAll(token, '[REDACTED]');
+  return safe.replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [REDACTED]');
+}
+
 export async function runPublish(executable, output, environment) {
   return new Promise((resolvePromise, reject) => {
     const child = spawn(executable, ['publish', output, '--json'], { env: environment, stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '';
+    let err = '';
     child.stdout.on('data', bytes => { out += bytes; });
-    // Never print provider diagnostics that might contain credentials.
-    child.stderr.resume();
+    child.stderr.on('data', bytes => { err = (err + bytes).slice(-8000); });
     child.on('error', reject);
     child.on('close', code => {
-      if (code !== 0) return reject(new Error(`Spacefast publish failed with exit code ${code}.`));
+      const details = redact((err || out).trim(), environment?.SPACEFAST_TOKEN);
+      if (code !== 0) return reject(new Error(`Spacefast publish failed with exit code ${code}.${details ? `\n${details}` : ''}`));
       try { resolvePromise(JSON.parse(out)); } catch { reject(new Error('Spacefast returned an invalid JSON receipt.')); }
     });
   });
