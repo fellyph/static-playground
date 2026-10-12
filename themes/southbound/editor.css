@@ -1,0 +1,15 @@
+/* Keep the image selectable and stationary while editing its content. */
+.editor-styles-wrapper .hero-photo {
+  --hero-inset: 0px;
+  width: 100%; left: auto; transform: none; clip-path: none;
+}
+.editor-styles-wrapper .hero-photo > .wp-block-image { position: static; }
+.editor-styles-wrapper .hero-photo .stamp { position: absolute; right: 28px; top: 28px; }
+.editor-styles-wrapper .hero-photo .photo-caption { position: absolute; left: 28px; bottom: 24px; }
+.editor-styles-wrapper .wp-block-post-content { margin: 0; }
+/* A selected button still needs its editor controls to remain reachable. */
+.editor-styles-wrapper .crew-button .wp-block-button__link { pointer-events: auto; }
+@media (max-width: 700px) {
+  .editor-styles-wrapper .hero-photo .stamp { right: 16px; top: 16px; }
+  .editor-styles-wrapper .hero-photo .photo-caption { left: 18px; bottom: 18px; }
+}

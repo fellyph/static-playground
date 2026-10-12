@@ -21,6 +21,24 @@ Set the production HTTPS origin and Spacefast Space ID in `site.config.json`. Se
 
 ## Edit, checkpoint, publish
 
+The Southbound theme source lives in `themes/southbound`. Its homepage uses native
+WordPress blocks in the **Front Page** template, with separate **Header** and
+**Footer** template parts. Open Appearance → Editor → Design → Templates → Front
+Page to edit the layout, copy, images, navigation, buttons, and Details blocks.
+The editor loads the theme styles and keeps the hero image stationary while you
+work; the public site retains the scroll effect. The homepage page supplies its
+URL and front-page assignment; the layout is owned by the template. The original
+Custom HTML layout is retained in a page revision in the migrated checkpoint.
+
+After editing the theme source locally, run `npm run theme:sync` to restore an
+isolated Playground, copy the source into it, and update the checkpoint and
+metadata together. This command migrates only the original, checksum-matched
+Southbound homepage and refuses unrecognized homepage content. Existing Site
+Editor template overrides remain in the database and take precedence over theme
+files; reset an override in the editor only when you intend to use the file version.
+For a temporary ZIP without replacing the checkpoint, use
+`npm run theme:sync -- --output .cache/theme-preview.zip`.
+
 1. Edit in WordPress Playground, manually or using its WebMCP tools.
 2. From Playground's Export menu, choose **Download as ZIP**.
 3. Import the ZIP locally:
@@ -53,7 +71,7 @@ The workflow runs unit tests and a generated-fixture browser test, builds the co
 
 Before destination variables are configured, CI validates using `https://fixture.example` and explicitly skips deployment. After both variables are set, a missing/invalid token fails deployment.
 
-The committed checkpoint is **Southbound Surf Crew**, exported from the saved Playground site `confident-classic-lake` on September 14, 2026. It restores WordPress 7.1 / PHP 8.3, the `southbound` block theme, and homepage ID 6. It includes the original starter pages and post; the draft privacy page stays unpublished. Unsplash images and Google Fonts remain external dependencies. The ZIP contains the actual saved site's complete `wp-content`, SQLite database, `wp-config.php`, and format-2 export manifest. Its checksum is recorded in `snapshots/site.json`. The generated acceptance fixture remains separate under `.cache/fixture`.
+The committed checkpoint is **Southbound Surf Crew**, originally exported from the saved Playground site `confident-classic-lake` on September 14, 2026. It restores WordPress 7.1 / PHP 8.3, the `southbound` block theme, and homepage ID 6. It includes the original starter pages and post; the draft privacy page stays unpublished. Unsplash images remain external dependencies; the theme fonts and their licenses are packaged locally. The ZIP contains the saved site's complete `wp-content`, SQLite database, `wp-config.php`, and format-2 export manifest. Its checksum is recorded in `snapshots/site.json`. The generated acceptance fixture remains separate under `.cache/fixture`.
 
 For local deployment, set `SPACEFAST_TOKEN` in your environment and run `npm run publish`. The command revalidates the static output and requires its production URL to match the destination configuration.
 
@@ -71,6 +89,7 @@ Native forms, search, commerce, accounts, and other server-dependent features ar
 npm test
 npx playwright install chromium
 npm run test:e2e
+npm run test:theme
 ```
 
 The fixture lives under `.cache/fixture`, separate from your checkpoint. Tests create uploaded images, nested pages, blog pagination, and database-backed Site Editor styles/template parts. They compare desktop/mobile WordPress and static screenshots, stop WordPress before testing static navigation, verify unpublished content is absent, then restore, edit, checkpoint, and rebuild a second time. Reports and screenshots remain under `.cache/fixture/reports`.
@@ -87,4 +106,4 @@ Restore editing by importing `snapshots/site.zip` through Playground's **Import 
 
 Playground CLI is pinned to 3.1.53: the inspected 3.1.54 npm package omitted its SQLite bundle. A narrow, checked postinstall patch binds the 3.1.53 ESM HTTP listener explicitly to `127.0.0.1`; that release otherwise advertises loopback while listening on all interfaces. Startup verifies the bound address. Review/remove this patch only when upgrading to a verified upstream release. Patched transitive versions of `qs`, `js-yaml`, and `esbuild` are locked via overrides.
 
-Public interface: `snapshot:import`, `build`, `validate`, `publish`, `test`, and `test:e2e`. Advanced testing overrides: `SITE_CONFIG`, `SNAPSHOT_DIR`, `OUTPUT_DIR`, and `REPORT_DIR`.
+Public interface: `snapshot:import`, `theme:sync`, `build`, `validate`, `publish`, `test`, `test:e2e`, and `test:theme`. The theme test verifies Site Editor save/reload, native block validation, responsive layout, and hero motion in an isolated Chromium/Playground instance. Advanced testing overrides: `SITE_CONFIG`, `SNAPSHOT_DIR`, `OUTPUT_DIR`, `REPORT_DIR`, and `TEST_SNAPSHOT` (theme test ZIP).

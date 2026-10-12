@@ -9,11 +9,13 @@
   "scripts": {
     "postinstall": "node scripts/patch-playground.mjs",
     "snapshot:import": "node scripts/snapshot-import.mjs",
+    "theme:sync": "node scripts/theme-sync.mjs",
     "fixture": "node scripts/fixture.mjs",
     "build": "node scripts/build.mjs",
     "validate": "node scripts/validate.mjs",
     "publish": "node scripts/publish.mjs",
     "test": "node --test test/*.test.mjs",
+    "test:theme": "node scripts/theme-e2e.mjs",
     "test:e2e": "node scripts/e2e.mjs"
   },
   "dependencies": {

@@ -29,6 +29,7 @@ jobs:
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npm run test:theme
       - run: npm run build
       - run: npm run validate
       - name: Publishing setup status

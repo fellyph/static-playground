@@ -1,15 +1,15 @@
 {
-  "sha256": "602d0108ab042f01e13a2f23199074c9057523df5d96ba9b657372316c12fc12",
-  "bytes": 8256776,
-  "entries": 249,
+  "sha256": "838eaf004793fac31ec17919255033a458094611801214028a1ec52d091e2d46",
+  "bytes": 8503053,
+  "entries": 266,
   "manifest": {
     "formatVersion": 2,
-    "siteUrl": "http://playground.wordpress.net/scope:confident-classic-lake"
+    "siteUrl": "http://127.0.0.1:60551"
   },
   "wordpressVersion": "7.1",
   "phpVersion": "8.3",
   "themes": {
-    "southbound": "1.1",
+    "southbound": "2.0",
     "twentytwentyfive": "1.5"
   },
   "plugins": {
@@ -17,6 +17,6 @@
   },
   "activeTheme": "southbound",
   "databaseIntegrity": "ok",
-  "importedAt": "2026-10-12T10:22:12.306Z",
+  "importedAt": "2026-10-12T14:06:33.888Z",
   "runtimeVersionSource": "Explicit import configuration; browser exports do not record runtime versions."
 }
