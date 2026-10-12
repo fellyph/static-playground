@@ -1,0 +1,157 @@
+{
+  "version": 3,
+  "settings": {
+    "appearanceTools": true,
+    "layout": {
+      "contentSize": "1400px",
+      "wideSize": "1500px"
+    },
+    "color": {
+      "palette": [
+        {
+          "slug": "sand",
+          "name": "Sand",
+          "color": "#f4f1e7"
+        },
+        {
+          "slug": "atlantic",
+          "name": "Atlantic",
+          "color": "#193c39"
+        },
+        {
+          "slug": "clay",
+          "name": "Clay",
+          "color": "#cf4d2c"
+        },
+        {
+          "slug": "lime",
+          "name": "Sun-faded Lime",
+          "color": "#e8eb88"
+        }
+      ]
+    },
+    "typography": {
+      "fontFamilies": [
+        {
+          "name": "DM Sans",
+          "slug": "body",
+          "fontFamily": "\"DM Sans\", sans-serif",
+          "fontFace": [
+            {
+              "fontFamily": "DM Sans",
+              "fontStyle": "normal",
+              "fontWeight": "400",
+              "fontDisplay": "swap",
+              "src": [
+                "file:./assets/fonts/dm-sans-400.ttf"
+              ]
+            },
+            {
+              "fontFamily": "DM Sans",
+              "fontStyle": "normal",
+              "fontWeight": "500",
+              "fontDisplay": "swap",
+              "src": [
+                "file:./assets/fonts/dm-sans-500.ttf"
+              ]
+            },
+            {
+              "fontFamily": "DM Sans",
+              "fontStyle": "normal",
+              "fontWeight": "600",
+              "fontDisplay": "swap",
+              "src": [
+                "file:./assets/fonts/dm-sans-600.ttf"
+              ]
+            },
+            {
+              "fontFamily": "DM Sans",
+              "fontStyle": "normal",
+              "fontWeight": "700",
+              "fontDisplay": "swap",
+              "src": [
+                "file:./assets/fonts/dm-sans-700.ttf"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Barlow Condensed",
+          "slug": "display",
+          "fontFamily": "\"Barlow Condensed\", sans-serif",
+          "fontFace": [
+            {
+              "fontFamily": "Barlow Condensed",
+              "fontStyle": "normal",
+              "fontWeight": "600",
+              "fontDisplay": "swap",
+              "src": [
+                "file:./assets/fonts/barlow-condensed-600.ttf"
+              ]
+            },
+            {
+              "fontFamily": "Barlow Condensed",
+              "fontStyle": "normal",
+              "fontWeight": "700",
+              "fontDisplay": "swap",
+              "src": [
+                "file:./assets/fonts/barlow-condensed-700.ttf"
+              ]
+            },
+            {
+              "fontFamily": "Barlow Condensed",
+              "fontStyle": "normal",
+              "fontWeight": "800",
+              "fontDisplay": "swap",
+              "src": [
+                "file:./assets/fonts/barlow-condensed-800.ttf"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Georgia",
+          "slug": "serif",
+          "fontFamily": "Georgia, serif"
+        }
+      ]
+    }
+  },
+  "styles": {
+    "color": {
+      "background": "#f4f1e7",
+      "text": "#193c39"
+    },
+    "spacing": {
+      "blockGap": "0px"
+    },
+    "typography": {
+      "fontFamily": "var:preset|font-family|body"
+    },
+    "elements": {
+      "heading": {
+        "typography": {
+          "fontFamily": "var:preset|font-family|display"
+        }
+      },
+      "link": {
+        "color": {
+          "text": "inherit"
+        }
+      }
+    }
+  },
+  "$schema": "https://schemas.wp.org/wp/6.6/theme.json",
+  "templateParts": [
+    {
+      "name": "header",
+      "title": "Header",
+      "area": "header"
+    },
+    {
+      "name": "footer",
+      "title": "Footer",
+      "area": "footer"
+    }
+  ]
+}

@@ -37,6 +37,7 @@ jobs:
       - if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
       - run: npm run test:e2e
+      - run: npm run test:theme
       - run: npm run build
       - name: Write build summary
         if: always()

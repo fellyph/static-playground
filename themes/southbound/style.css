@@ -1,0 +1,69 @@
+/*
+Theme Name: Southbound
+Description: A sun-faded surf journal for Portugal's southern coast.
+Version: 2.0
+Requires at least: 6.6
+Text Domain: southbound
+License: GPL-2.0-or-later
+*/
+:root{--sand:var(--wp--preset--color--sand,#f4f1e7);--ink:var(--wp--preset--color--atlantic,#193c39);--orange:var(--wp--preset--color--clay,#cf4d2c);--line:#c4c8b9}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--sand);color:var(--ink);font-family:var(--wp--preset--font-family--body,'DM Sans'),sans-serif}.wp-site-blocks{padding:0}.entry-content{margin:0}a{color:inherit}a:focus-visible,summary:focus-visible{outline:3px solid var(--orange);outline-offset:5px}.skip{position:absolute;left:16px;top:-80px;z-index:50;background:var(--sand);padding:12px}.skip:focus{top:40px}.shell{max-width:1500px;margin:auto;padding:0 5%}.nav{height:100px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:20px}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-family:var(--wp--preset--font-family--display,'Barlow Condensed'),sans-serif;font-size:29px;font-weight:800;line-height:.83;letter-spacing:-1px}.brand span{display:block}.brand svg{width:42px;height:42px}.navlinks{display:flex;gap:34px;font-size:13px;font-weight:600}.navlinks a{text-decoration:none}.navlinks a:hover{color:var(--orange)}.pill{display:inline-flex;align-items:center;justify-content:center;gap:24px;border:1px solid var(--ink);border-radius:30px;padding:13px 22px;text-decoration:none;font-size:13px;font-weight:600}.pill:hover{background:var(--ink);color:var(--sand)}.hero{padding-top:40px}.eyebrow{text-transform:uppercase;font-size:10px;letter-spacing:2px;font-weight:700;display:flex;align-items:center;gap:10px}.dot{width:7px;height:7px;background:var(--orange);border-radius:50%}.hero-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:20px 0 32px}h1,h2,h3,p{margin:0}h1,h2,h3{font-family:var(--wp--preset--font-family--display,'Barlow Condensed'),sans-serif;text-transform:uppercase}.hero h1{font-size:clamp(76px,10vw,150px);font-weight:700;letter-spacing:-3px;line-height:.85}.hero h1 em{font-family:Georgia,serif;font-size:.75em;font-weight:400;letter-spacing:-6px;text-transform:lowercase}.intro{max-width:290px;font-size:14px;line-height:1.7;padding-bottom:3px}.intro a{display:inline-block;margin-top:17px;text-underline-offset:5px;font-weight:700}.hero-photo{height:470px;position:relative;overflow:hidden;background:#507f83}.hero-photo img{height:100%;width:100%;object-fit:cover;object-position:center 55%;filter:brightness(.78)}.photo-caption{position:absolute;bottom:24px;left:28px;color:white;font-size:11px;letter-spacing:1px}.stamp{position:absolute;right:28px;top:28px;border-radius:50%;background:#e8eb88;color:var(--ink);width:124px;height:124px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transform:rotate(12deg);font-size:10px;font-weight:700;letter-spacing:1px}.stamp b{font-family:Georgia,serif;font-size:37px;font-weight:400;line-height:1.1}.ticker{display:flex;justify-content:space-between;gap:20px;padding:19px 0;border-bottom:1px solid var(--line);font-size:10px;letter-spacing:1.5px;text-transform:uppercase}.ticker > p:nth-child(2){color:var(--orange)}.story{display:grid;grid-template-columns:1fr 2fr;gap:60px;padding:100px 0;scroll-margin-top:35px}.story h2{font-size:clamp(45px,5.6vw,78px);line-height:1;letter-spacing:-1px;max-width:770px}.story h2 em{font-family:Georgia,serif;text-transform:lowercase;font-weight:400;color:var(--orange)}.story-copy{display:grid;grid-template-columns:1fr 1fr;gap:35px;margin-top:28px;font-size:14px;line-height:1.85}.coast{background:var(--ink);color:var(--sand);padding:68px 0 72px;scroll-margin-top:0}.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;margin:16px 0 32px}.section-head h2{font-size:65px;line-height:1}.section-head p{max-width:300px;font-size:13px;line-height:1.7}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:23px}.card img{width:100%;height:255px;object-fit:cover}.card-header{display:flex;justify-content:space-between;align-items:center;margin:18px 0 10px}.card h3{font-size:34px;letter-spacing:.4px}.card small{font-size:10px;letter-spacing:1px;color:#c4ccae}.card p{font-size:13px;line-height:1.75;color:#d0d9cc}.notes{padding:85px 0;display:grid;grid-template-columns:1fr 1.4fr;gap:90px;scroll-margin-top:30px}.notes h2{font-size:65px;line-height:.95;margin-top:20px}.notes details{padding:24px 0;border-top:1px solid var(--line)}.notes details:last-child{border-bottom:1px solid var(--line)}.notes summary{cursor:pointer;font-weight:600;font-size:17px}.notes details p{font-size:14px;line-height:1.8;max-width:540px;margin-top:18px}.outro{background:#e8eb88;padding:44px 5%;display:flex;justify-content:space-between;align-items:center;gap:24px}.outro h2{font-size:clamp(40px,5vw,68px);line-height:1}.footer{display:flex;justify-content:space-between;gap:20px;padding:28px 0;font-size:10px;letter-spacing:1px}.footer a{text-underline-offset:4px}@media(max-width:700px){.shell{padding:0 6%}.nav{height:85px}.brand{font-size:24px}.brand svg{width:32px}.navlinks{gap:15px;font-size:11px}.nav>.pill{display:none}.hero{padding-top:26px}.hero-top{display:block;padding-top:24px}.hero h1{font-size:82px;letter-spacing:-2px}.hero h1 em{letter-spacing:-4px}.intro{max-width:100%;margin-top:24px}.hero-photo{height:390px}.stamp{width:96px;height:96px;right:16px;top:16px;font-size:8px}.stamp b{font-size:30px}.photo-caption{left:18px;bottom:18px;font-size:9px}.ticker{font-size:8px;letter-spacing:.5px}.ticker > p:last-child{display:none}.story{grid-template-columns:1fr;gap:25px;padding:60px 0}.story-copy{grid-template-columns:1fr;gap:16px}.section-head{display:block}.section-head h2{font-size:53px}.section-head p{margin-top:20px}.cards{grid-template-columns:1fr;gap:35px}.card img{height:280px}.notes{grid-template-columns:1fr;gap:35px;padding:60px 0}.notes h2{font-size:52px}.outro{align-items:flex-start;flex-direction:column;padding:32px 6%}.footer{font-size:8px;line-height:1.6}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media(max-width:400px){.hero h1{font-size:clamp(48px,18vw,72px)}.nav{gap:10px;flex-wrap:wrap;height:auto;padding:18px 0}.navlinks{gap:18px;flex-wrap:wrap}.brand{font-size:23px}.hero-photo{height:320px}.section-head h2,.notes h2{font-size:44px}.ticker{flex-wrap:wrap}.footer{flex-direction:column}.stamp{width:85px;height:85px}.story h2{font-size:42px}}
+/* The wave opens edge to edge, then settles into the journal's page margins. */
+.hero-photo {
+  --hero-inset: 0px;
+  width: var(--hero-viewport, 100%);
+  left: 50%;
+  transform: translateX(-50%);
+  clip-path: inset(0 var(--hero-inset));
+}
+.hero-photo .stamp {
+  right: calc(var(--hero-inset) + 28px);
+}
+.hero-photo .photo-caption {
+  left: calc(var(--hero-inset) + 28px);
+}
+@media (max-width: 700px) {
+  .hero-photo .stamp { right: calc(var(--hero-inset) + 16px); }
+  .hero-photo .photo-caption { left: calc(var(--hero-inset) + 18px); }
+}
+
+/* Native blocks retain the original journal layout in both editing contexts. */
+.brand a { text-decoration: none; }
+.brand .brand-mark { width: 42px; flex: 0 0 42px; margin: 0; }
+.brand .brand-mark img { display: block; width: 42px; height: 42px; }
+.brand .wp-block-site-title {
+  width: 165px; margin: 0; font-size: inherit; line-height: inherit;
+  text-transform: uppercase; font-weight: 800; letter-spacing: -1px;
+}
+.navlinks .wp-block-navigation__container { gap: 34px; }
+.crew-button .wp-block-button__link {
+  display: inline-flex; align-items: center; justify-content: center; gap: 24px;
+  border: 1px solid var(--ink); border-radius: 30px; padding: 13px 22px;
+  background: transparent; color: inherit; font-size: 13px; font-weight: 600;
+  text-decoration: none; line-height: normal;
+}
+.crew-button .wp-block-button__link:hover { background: var(--ink); color: var(--sand); }
+.hero > .eyebrow::before { content: ''; flex: 0 0 7px; height: 7px; border-radius: 50%; background: var(--orange); }
+.hero-photo > .wp-block-image { margin: 0; width: 100%; height: 100%; }
+.hero-photo > .wp-block-image img { display: block; }
+.stamp { background: var(--wp--preset--color--lime, #e8eb88); }
+.stamp p { margin: 0; line-height: 1.1; }
+.stamp .stamp-word { font-family: Georgia, serif; font-size: 37px; font-weight: 400; letter-spacing: 0; }
+.card > .wp-block-image { margin: 0; }
+.card-header .card-label { font-size: 10px; letter-spacing: 1px; color: #c4ccae; }
+.outro { background: var(--wp--preset--color--lime, #e8eb88); }
+.outro .eyebrow { margin-bottom: 12px; }
+.page-content { padding-top: 60px; padding-bottom: 80px; }
+.page-content > .wp-block-post-title { font-size: clamp(40px, 6vw, 80px); line-height: 1; margin-bottom: 32px; }
+.page-content .wp-block-post-template { list-style: none; padding: 0; }
+.page-content .wp-block-post { margin-bottom: 40px; }
+.page-content .wp-block-post-content { line-height: 1.8; }
+.page-content .wp-block-post-content > * + * { margin-top: 24px; }
+@media (max-width: 700px) {
+  .brand .brand-mark { width: 32px; flex-basis: 32px; }
+  .brand .brand-mark img { width: 32px; height: 32px; }
+  .brand .wp-block-site-title { width: 136px; }
+  .navlinks .wp-block-navigation__container { gap: 15px; font-size: 11px; }
+  .nav > .wp-block-buttons { display: none; }
+  .stamp .stamp-word { font-size: 30px; }
+}
