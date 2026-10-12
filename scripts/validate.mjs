@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { outputDir, reportDir, json, saveJson, sha256 } from './lib/config.mjs';
 import { html, css } from './lib/transform.mjs';
@@ -7,6 +7,7 @@ import { routeFile, safePath, temporaryUrl } from './lib/urls.mjs';
 export async function walk(directory, prefix = '') {
   const result = [];
   for (const entry of await readdir(resolve(directory, prefix), { withFileTypes: true })) {
+    if (!prefix && (entry.name === '.gitignore' || entry.name === '.spacefast')) continue;
     if (entry.isSymbolicLink()) throw new Error('Symlinks are not allowed in published output.');
     const name = prefix + entry.name;
     if (entry.isDirectory()) result.push(...await walk(directory, name + '/'));
