@@ -3,8 +3,12 @@ import postcss from 'postcss';
 import valueParser from 'postcss-value-parser';
 import parseSrcset from 'parse-srcset';
 
+function stripSourceUrl(text) {
+  return text.replace(/\/\*#\s*sourceURL=.*?\*\/\s*/g, '').replace(/\/\/#\s*sourceURL=[^\r\n]*\s*/g, '');
+}
+
 export function css(text, rewrite) {
-  const tree = postcss.parse(text);
+  const tree = postcss.parse(stripSourceUrl(text));
   function value(input) {
     const parsed = valueParser(input);
     parsed.walk(node => {
@@ -45,7 +49,13 @@ export function html(text, rewrite, rewriteText = x => x) {
       } else if (['src', 'poster'].includes(attr.name) || (node.tagName === 'object' && attr.name === 'data')) attr.value = rewrite(attr.value, 'asset');
       else if (attr.name === 'href') {
         const rel = get('rel').toLowerCase().split(/\s+/);
-        const kind = node.tagName === 'link' && rel.some(r => ['canonical', 'dns-prefetch', 'preconnect'].includes(r)) ? 'canonical' : node.tagName === 'link' && rel.some(r => ['stylesheet', 'icon', 'preload', 'modulepreload', 'apple-touch-icon'].includes(r)) ? 'asset' : 'link';
+        const kind = node.tagName === 'link' && rel.includes('canonical')
+          ? 'canonical'
+          : node.tagName === 'link' && rel.some(r => ['dns-prefetch', 'preconnect'].includes(r))
+            ? 'resource-hint'
+            : node.tagName === 'link' && rel.some(r => ['stylesheet', 'icon', 'preload', 'modulepreload', 'apple-touch-icon'].includes(r))
+              ? 'asset'
+              : 'link';
         attr.value = rewrite(attr.value, kind);
       } else if (node.tagName === 'meta' && attr.name === 'content') {
         const property = get('property') || get('name');
@@ -66,10 +76,13 @@ export function html(text, rewrite, rewriteText = x => x) {
           for (const scope of Object.values(map.scopes || {})) for (const [key, value] of Object.entries(scope)) scope[key] = rewrite(value, 'asset');
           child.value = JSON.stringify(map);
         }
-        child.value = rewriteText(child.value);
+        child.value = stripSourceUrl(rewriteText(child.value));
       }
     }
-    for (const child of node.childNodes || []) visit(child);
+    if (node.childNodes) {
+      for (const child of node.childNodes) visit(child);
+      node.childNodes = node.childNodes.filter(child => !(child.tagName === 'link' && !(child.attrs || []).some(a => a.name === 'href')));
+    }
     if (node.content) visit(node.content);
   }
   visit(doc);
