@@ -18,6 +18,7 @@ export async function config() {
   c.wordpressVersion = c.wordpressVersion || '6.8.3';
   c.phpVersion = c.phpVersion || '8.3';
   c.additionalRoutes ??= [];
+  c.excludeRoutes ??= [];
   if (!c.productionUrl) throw new Error('Set PRODUCTION_URL or copy site.config.example.json to site.config.json.');
   const url = new URL(c.productionUrl);
   if (url.protocol !== 'https:' || url.pathname !== '/' || url.search || url.hash || url.username || url.password) {
@@ -26,6 +27,7 @@ export async function config() {
   c.productionUrl = url.origin;
   if (!/^\d+\.\d+(\.\d+)?$/.test(c.wordpressVersion) || !/^\d+\.\d+$/.test(c.phpVersion)) throw new Error('Use explicit WordPress and PHP versions.');
   if (!Array.isArray(c.additionalRoutes) || c.additionalRoutes.some(r => typeof r !== 'string' || !r.startsWith('/') || r.startsWith('//') || /[?#]/.test(r))) throw new Error('additionalRoutes must contain absolute site paths without query strings.');
+  if (!Array.isArray(c.excludeRoutes) || c.excludeRoutes.some(r => typeof r !== 'string' || !r.startsWith('/') || r.startsWith('//') || /[?#]/.test(r))) throw new Error('excludeRoutes must contain absolute site paths without query strings.');
   return c;
 }
 export const snapshotDir = process.env.SNAPSHOT_DIR ? resolve(process.env.SNAPSHOT_DIR) : resolve(root, 'snapshots');
