@@ -3,14 +3,11 @@ import { readFile } from 'node:fs/promises';
 import { wpCLI } from '@wp-playground/blueprints';
 import { inspectArchive } from './archive.mjs';
 
-export async function startRuntime(c, archive) {
+export async function startRuntime(c, archive, preInspected = null) {
   const steps = archive ? [{ step: 'importWordPressFiles', wordPressFilesZip: { resource: 'literal', name: 'site.zip', contents: new Uint8Array(await readFile(archive)) } }] : [];
   const runtime = await runCLI({
-    // The CLI's version resolver prefix-matches beta offers (7.1 can select
-    // 7.1.1-RC1). An official release URL preserves the requested checkpoint.
     command: 'server', port: 0, wp: `https://wordpress.org/wordpress-${c.wordpressVersion}.zip`, php: c.phpVersion,
     ...(!archive && c.fixtureSourceUrl ? { 'site-url': c.fixtureSourceUrl } : {}),
-    // Archive steps use /tmp across multiple calls; keep them on one worker.
     login: false, internalCookieStore: false, verbosity: process.env.PLAYGROUND_VERBOSE ? 'normal' : 'quiet', workers: 1,
     'define-bool': { DISABLE_WP_CRON: true, AUTOMATIC_UPDATER_DISABLED: true },
     wordpressInstallMode: 'download-and-install',
@@ -21,18 +18,19 @@ export async function startRuntime(c, archive) {
     await runtime[Symbol.asyncDispose]();
     throw new Error('Playground must bind only to loopback.');
   }
-  // The CLI sends one anonymous session-reset redirect on its first request.
-  // Consume it without cookies; keep Wget's no-redirect policy for real routes.
   try {
     const handshake = await fetch(runtime.serverUrl, { redirect: 'manual', signal: AbortSignal.timeout(30000) });
     await handshake.arrayBuffer();
     if (archive) {
-      const { manifest } = await inspectArchive(archive);
-      const old = manifest.siteUrl.replace(/\/$/, '');
+      const inspected = preInspected || await inspectArchive(archive);
       const current = runtime.serverUrl.replace(/\/$/, '');
-      const replacements = [[old, current], [old.replaceAll('/', '\\/'), current.replaceAll('/', '\\/')]];
-      const scope = new URL(old).pathname;
-      if (scope.includes('/scope:')) replacements.push([scope.replace(/\/?$/, '/'), '/']);
+      const origins = new Set([inspected.manifest.siteUrl, inspected.databaseSiteUrl, inspected.databaseHomeUrl].filter(Boolean).map(u => u.replace(/\/$/, '')));
+      const replacements = [];
+      for (const old of origins) {
+        replacements.push([old, current], [old.replaceAll('/', '\\/'), current.replaceAll('/', '\\/')]);
+        const scope = new URL(old).pathname;
+        if (scope.includes('/scope:')) replacements.push([scope.replace(/\/?$/, '/'), '/']);
+      }
       for (const [from, to] of replacements) {
         if (from === to) continue;
         const result = await wpCLI(runtime.playground, { command: ['wp', 'search-replace', from, to, '--all-tables-with-prefix', '--precise', '--skip-columns=guid', '--quiet'] });
