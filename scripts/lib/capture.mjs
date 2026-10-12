@@ -1,4 +1,3 @@
-import { spawn } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { assetFile, routeFile, safePath } from './urls.mjs';
@@ -7,18 +6,20 @@ import { init, parse as parseModules } from 'es-module-lexer';
 
 export async function download(url, file, allow404 = false) {
   await mkdir(dirname(file), { recursive: true });
-  return new Promise((resolvePromise, reject) => {
-    const child = spawn('wget', ['--no-config', '--no-proxy', '--no-cookies', '--timeout=30', '--tries=2', '--max-redirect=0', '--server-response', '--content-on-error', '--output-document', file, '--', url], { stdio: ['ignore', 'ignore', 'pipe'] });
-    let log = '';
-    child.stderr.on('data', data => { log = (log + data).slice(-16000); });
-    child.on('error', reject);
-    child.on('close', code => {
-      const status = [...log.matchAll(/HTTP\/\S+ (\d+)/g)].at(-1)?.[1];
-      const type = [...log.matchAll(/Content-Type:\s*([^\r\n]+)/gi)].at(-1)?.[1] || '';
-      if (code !== 0 && !(allow404 && status === '404')) reject(new Error(`Wget failed (${code}, HTTP ${status || 'unknown'}) for ${url}\n${log}`));
-      else resolvePromise({ status: Number(status), type });
-    });
-  });
+  let response;
+  try {
+    response = await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(30000) });
+  } catch (error) {
+    throw new Error(`Wget failed (network, HTTP unknown) for ${url}\n${error.message}`);
+  }
+  const status = response.status;
+  const type = response.headers.get('content-type') || '';
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  await writeFile(file, bytes);
+  if ((status < 200 || status >= 300) && !(allow404 && status === 404)) {
+    throw new Error(`Wget failed (8, HTTP ${status}) for ${url}`);
+  }
+  return { status, type };
 }
 
 export async function capture({ origin, oldOrigin, productionUrl, routes, output }) {
@@ -35,7 +36,6 @@ export async function capture({ origin, oldOrigin, productionUrl, routes, output
     const file = assetFile(url);
     const key = new URL(url.pathname + url.search, origin).href;
     const previous = files.get(file);
-    // WordPress's version query identifies a cache key, not a separate response.
     if (previous && previous !== key && new URL(previous).pathname !== url.pathname) throw new Error(`Asset collision: ${file}`);
     if (!previous) { files.set(file, key); queue.set(key, file); }
     return '/' + file.split('/').map(encodeURIComponent).join('/');
@@ -43,7 +43,9 @@ export async function capture({ origin, oldOrigin, productionUrl, routes, output
   function rewriter(base) {
     return (raw, kind) => {
       if (!raw || /^(#|data:|mailto:|tel:|javascript:|blob:)/i.test(raw)) return raw;
+      const isHint = kind === 'resource-hint' || (kind === 'canonical' && raw.startsWith('//'));
       const { url, internal } = local(raw, base);
+      if (isHint) return internal ? null : raw;
       if (!internal) { if (kind.includes('asset')) external.add(url.href); return raw; }
       if (kind === 'link' && /^\/(wp-admin(?:\/|$)|wp-login\.php(?:$|\/))/.test(url.pathname)) {
         omittedLinks.push({ from: new URL(base).pathname, target: url.pathname, reason: 'WordPress administration is unavailable on the static host.' });
@@ -72,13 +74,14 @@ export async function capture({ origin, oldOrigin, productionUrl, routes, output
     const target = resolve(output, file);
     const response = await download(new URL(route, origin).href, target);
     if (!response.type.includes('text/html')) throw new Error(`Expected HTML for ${route}, received ${response.type}`);
-    await writeFile(target, html(await readFile(target, 'utf8'), rewriter(new URL(route, origin)), rewriteText));
+    const rendered = html(await readFile(target, 'utf8'), rewriter(new URL(route, origin)), rewriteText)
+      .replace(/<link\b[^>]*\brel=["']?(?:dns-prefetch|preconnect)["']?(?![^>]*\bhref=)[^>]*>/gi, '');
+    await writeFile(target, rendered);
   }
   const notFound = resolve(output, '404.html');
   const missingUrl = new URL('/__static_playground_missing_page__/', origin);
   const missing = await download(missingUrl.href, notFound, true);
   if (missing.status !== 404) throw new Error('WordPress must return HTTP 404 for missing routes.');
-  // Themes often include native search on their 404 template; use a static 404 instead.
   await writeFile(notFound, '<!doctype html><html lang="en"><meta charset="utf-8"><title>Page not found</title><h1>Page not found</h1><p><a href="/">Return home</a></p></html>');
   for (const [url, file] of queue) {
     if (queue.size > 20000) throw new Error('Asset limit exceeded (20,000).');
