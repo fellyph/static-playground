@@ -33,8 +33,10 @@ export async function publish(c) {
   await validate();
   const receipt = await runPublish(resolve(root, 'node_modules/.bin/sf'), outputDir, { ...process.env, SPACEFAST_SPACE: c.spacefastSpace, CI: 'true' });
   if (!receipt.data?.space?.liveUrl) throw new Error('Spacefast receipt has no live URL.');
-  await saveJson(resolve(reportDir, 'deployment.json'), { commit: process.env.GITHUB_SHA || build.commit, checkpoint: build.checkpoint, version: receipt.data.version?.ref, liveUrl: receipt.data.space.liveUrl, publishedAt: new Date().toISOString() });
+  const deployment = { commit: process.env.GITHUB_SHA || build.commit, checkpoint: build.checkpoint, ...(build.theme ? { theme: build.theme } : {}), version: receipt.data.version?.ref, liveUrl: receipt.data.space.liveUrl, publishedAt: new Date().toISOString() };
+  await saveJson(resolve(reportDir, 'deployment.json'), deployment);
   console.log(`Published: ${receipt.data.space.liveUrl}`);
+  return deployment;
 }
 if (process.argv[1] === import.meta.filename) {
   try { await publish(await config()); } catch (error) { console.error(error.message); process.exitCode = 1; }

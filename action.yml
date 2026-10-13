@@ -1,0 +1,76 @@
+name: WordPress theme to Spacefast
+description: Render a WordPress block theme with a Playground content checkpoint and publish its validated static site to Spacefast.
+author: fellyph
+branding:
+  icon: upload-cloud
+  color: blue
+inputs:
+  mode:
+    description: build, publish, or build-and-publish. Publishing requires SPACEFAST_TOKEN in the step environment.
+    default: build
+  theme-path:
+    description: Theme source directory relative to the caller workspace. Required when building.
+  theme-slug:
+    description: WordPress theme slug. Defaults to the theme directory name.
+  snapshot-path:
+    description: Caller directory containing site.zip and site.json.
+    default: snapshots
+  config-path:
+    description: Optional caller site.config.json, for additional routes and export settings.
+  output-path:
+    description: Caller directory for generated public files, replaced during a build.
+    default: dist
+  report-path:
+    description: Caller directory for build, validation, and deployment reports.
+    default: reports
+  production-url:
+    description: HTTPS origin used for canonical URLs. Required in every mode.
+    required: true
+  spacefast-space:
+    description: Existing Spacefast Space ID or slug. Required when publishing.
+outputs:
+  output-path:
+    description: Absolute path to the validated static output.
+    value: ${{ steps.run.outputs.output-path }}
+  report-path:
+    description: Absolute path to the reports directory.
+    value: ${{ steps.run.outputs.report-path }}
+  theme-sha256:
+    description: Checksum of the theme source used in the build.
+    value: ${{ steps.run.outputs.theme-sha256 }}
+  live-url:
+    description: Spacefast live URL, populated after publishing.
+    value: ${{ steps.run.outputs.live-url }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v5
+      with:
+        node-version: '24'
+    - name: Install action dependencies
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: npm ci --omit=dev
+    - name: Install Wget for builds
+      if: inputs.mode != 'publish'
+      shell: bash
+      run: |
+        if ! command -v wget >/dev/null; then
+          sudo apt-get update
+          sudo apt-get install -y wget
+        fi
+    - name: Build or publish the caller site
+      id: run
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      env:
+        ACTION_MODE: ${{ inputs.mode }}
+        ACTION_THEME_PATH: ${{ inputs.theme-path }}
+        ACTION_THEME_SLUG: ${{ inputs.theme-slug }}
+        ACTION_SNAPSHOT_PATH: ${{ inputs.snapshot-path }}
+        ACTION_CONFIG_PATH: ${{ inputs.config-path }}
+        ACTION_OUTPUT_PATH: ${{ inputs.output-path }}
+        ACTION_REPORT_PATH: ${{ inputs.report-path }}
+        ACTION_PRODUCTION_URL: ${{ inputs.production-url }}
+        ACTION_SPACEFAST_SPACE: ${{ inputs.spacefast-space }}
+      run: node "$GITHUB_ACTION_PATH/scripts/action.mjs"

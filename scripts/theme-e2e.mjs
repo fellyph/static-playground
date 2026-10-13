@@ -3,6 +3,7 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { startRuntime, php } from './lib/runtime.mjs';
 import { resolve } from 'node:path';
 import { root, snapshotDir } from './lib/config.mjs';
+import { applyTheme } from './lib/theme.mjs';
 const checkpoint=JSON.parse(await readFile(resolve(snapshotDir,'site.json'),'utf8'));
 const archive=process.env.TEST_SNAPSHOT || resolve(snapshotDir,'site.zip');
 const reports=resolve(root,'reports/site-editor');
@@ -12,6 +13,7 @@ let browser;
 let page;
 const errors=[];
 try {
+  await applyTheme(runtime);
   const cookies=JSON.parse(await php(runtime,`
     $users=get_users(array('role'=>'administrator','number'=>1));
     if (!$users) throw new Exception('No test administrator.');
