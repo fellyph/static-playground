@@ -5,8 +5,9 @@ import { config, json, saveJson, snapshotDir, outputDir, reportDir, root, sha256
 import { startRuntime, metadata } from './lib/runtime.mjs';
 import { capture } from './lib/capture.mjs';
 import { validate } from './validate.mjs';
+import { applyTheme, themeSource as defaultThemeSource } from './lib/theme.mjs';
 
-export async function build(c, { snapshots = snapshotDir, output = outputDir, reports = reportDir, beforeStop } = {}) {
+export async function build(c, { snapshots = snapshotDir, output = outputDir, reports = reportDir, beforeStop, themeSource, themeSlug } = {}) {
   const checkpoint = await json(resolve(snapshots, 'site.json'));
   const archive = resolve(snapshots, 'site.zip');
   if (sha256(await readFile(archive)) !== checkpoint.sha256) throw new Error('Snapshot checksum mismatch. Re-import the ZIP.');
@@ -18,6 +19,7 @@ export async function build(c, { snapshots = snapshotDir, output = outputDir, re
   const runtime = await startRuntime({ ...c, wordpressVersion: checkpoint.wordpressVersion, phpVersion: checkpoint.phpVersion }, archive);
   let result;
   try {
+    const theme = themeSource ? await applyTheme(runtime, themeSource, themeSlug) : null;
     console.log('Checking database and discovering public routes...');
     const restored = await metadata(runtime);
     if (restored.wordpressVersion !== checkpoint.wordpressVersion || restored.phpVersion !== checkpoint.phpVersion) {
@@ -30,8 +32,8 @@ export async function build(c, { snapshots = snapshotDir, output = outputDir, re
     const routes = [...new Set([...JSON.parse(response.text), ...c.additionalRoutes])].sort();
     console.log(`Capturing ${routes.length} public routes with Wget...`);
     result = await capture({ origin: new URL(runtime.serverUrl).origin, oldOrigin: checkpoint.manifest.siteUrl, productionUrl: c.productionUrl, routes, output });
-    let commit = null; try { commit = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch {}
-    result = { ...result, productionUrl: c.productionUrl, checkpoint: checkpoint.sha256, commit, builtAt: new Date().toISOString() };
+    let commit = process.env.GITHUB_SHA || null; try { commit ||= execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch {}
+    result = { ...result, productionUrl: c.productionUrl, checkpoint: checkpoint.sha256, ...(theme ? { theme } : {}), commit, builtAt: new Date().toISOString() };
     await saveJson(resolve(reports, 'build.json'), result);
     await validate({ output, reports });
     if (beforeStop) await beforeStop(runtime);
@@ -41,5 +43,5 @@ export async function build(c, { snapshots = snapshotDir, output = outputDir, re
   return result;
 }
 if (process.argv[1] === import.meta.filename) {
-  try { await build(await config()); } catch (error) { console.error(error.stack); process.exitCode = 1; }
+  try { await build(await config(), { themeSource: process.argv.includes('--theme') ? defaultThemeSource : undefined }); } catch (error) { console.error(error.stack); process.exitCode = 1; }
 }

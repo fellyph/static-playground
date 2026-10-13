@@ -1,4 +1,4 @@
-name: Static site
+name: Publish theme site to Spacefast
 on:
   push:
     branches: [main]
@@ -37,10 +37,21 @@ jobs:
       - if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
       - run: npm run test:e2e
-      - run: npm run test:theme
-      - run: npm run build
-      - name: Write build summary
-        if: always()
+      - name: Test committed theme in the Site Editor
+        run: npm run test:theme
+      - name: Verify theme-only edits reach the static site
+        run: npm run test:theme-build
+      - name: Verify use from another repository
+        run: npm run test:action
+      - name: Build and validate site with the reusable action
+        uses: ./
+        with:
+          mode: build
+          theme-path: themes/southbound
+          theme-slug: southbound
+          production-url: ${{ vars.PRODUCTION_URL || 'https://fixture.example' }}
+      - name: Write failed build summary
+        if: failure()
         run: node scripts/summary.mjs
       - name: Publishing setup status
         if: vars.PRODUCTION_URL == '' || vars.SPACEFAST_SPACE == ''
@@ -52,6 +63,8 @@ jobs:
           path: |
             reports/
             .cache/fixture/reports/
+            .cache/theme-build-test/reports/
+            .cache/action-test/reports/
           include-hidden-files: true
           retention-days: 14
       - uses: actions/upload-artifact@v6
@@ -69,7 +82,9 @@ jobs:
     concurrency:
       group: spacefast-production
       cancel-in-progress: false
-    environment: production
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
     env:
       PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
       SPACEFAST_SPACE: ${{ vars.SPACEFAST_SPACE }}
@@ -77,11 +92,6 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v5
-        with:
-          node-version: '24'
-          cache: npm
-      - run: npm ci --omit=dev
       - uses: actions/download-artifact@v6
         with:
           name: static-${{ github.sha }}
@@ -100,11 +110,15 @@ jobs:
           if [ "$head" = "$GITHUB_SHA" ]; then echo 'publish=true' >> "$GITHUB_OUTPUT"; fi
       - name: Publish validated output
         if: steps.current.outputs.publish == 'true'
+        uses: ./
+        with:
+          mode: publish
+          production-url: ${{ vars.PRODUCTION_URL }}
+          spacefast-space: ${{ vars.SPACEFAST_SPACE }}
         env:
           SPACEFAST_TOKEN: ${{ secrets.SPACEFAST_TOKEN }}
-        run: npm run publish
-      - name: Write deployment summary
-        if: always()
+      - name: Write failed deployment summary
+        if: failure()
         run: node scripts/summary.mjs
       - uses: actions/upload-artifact@v6
         if: always()

@@ -15,6 +15,7 @@ export function formatBuildSummary({ build, validation, deployment }) {
     lines.push(`| External Assets | ${build.externalAssets?.length ?? 0} |`);
     lines.push(`| Omitted Links | ${build.omittedLinks?.length ?? 0} |`);
     if (build.checkpoint) lines.push(`| Checkpoint SHA-256 | \`${build.checkpoint.slice(0, 12)}\` |`);
+    if (build.theme) lines.push(`| Theme | ${build.theme.slug} (\`${build.theme.sha256.slice(0, 12)}\`) |`);
   }
   if (validation) {
     lines.push(`| Validation | ${validation.passed ? 'Passed' : 'Failed'} |`);
